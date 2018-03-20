@@ -1,39 +1,18 @@
-- [Disclaimer](#sec-1)
-- [Objective](#sec-2)
-- [Pre requisites](#sec-3)
-- [In pratice: Terraform basics: vars and outputs](#sec-4)
-- [Going Further](#sec-5)
+- [Objective](#sec-1)
+- [Pre requisites](#sec-2)
+- [In pratice: Terraform basics: vars and outputs](#sec-3)
+- [Going Further](#sec-4)
 
 
-# Disclaimer<a id="sec-1"></a>
-
-This [document](unikernels.md) is written in org mode within emacs, then exported in various format such as markdown or html. As such, you may copy/paste code snippets in a shell terminal.
-
-But if you're editing this document within emacs, you can use it as a runnable notebook. You just have to hit `C-c C-c` on src blocks and code will be executed & outputted within the document, along with a shell buffer named `*journey*`.
-
-Don't forget to load babel support for shell lang by hitting `C-c C-c` on the following block:
-
-```emacs-lisp
-(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
-```
-
-& then try it:
-
-```bash
-echo 'vi vi vi is the editor of the Beast!'
-```
-
-<span class="underline">Tip</span>: you can hit `Tab` or `Shift-Tab` multiple times to collapse/uncollapse paragraphs.
-
-# Objective<a id="sec-2"></a>
+# Objective<a id="sec-1"></a>
 
 This document is the second part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time with more advanced features of terraform, such as multiple `tf` files, variables, interpolation and outputs.
 
-# Pre requisites<a id="sec-3"></a>
+# Pre requisites<a id="sec-2"></a>
 
 Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-# In pratice: Terraform basics: vars and outputs<a id="sec-4"></a>
+# In pratice: Terraform basics: vars and outputs<a id="sec-3"></a>
 
 You can `cd` in the second step directory and have a look at the directory structure.
 
@@ -248,7 +227,7 @@ terraform destroy -var region=SBG3
     
     Destroy complete! Resources: 1 destroyed.
 
-# Going Further<a id="sec-5"></a>
+# Going Further<a id="sec-4"></a>
 
 You can now jump to the [thierd step](../2-simple-terraform-state/README.md) of our journey introducing terraform state.
 

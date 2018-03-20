@@ -1,39 +1,18 @@
-- [Disclaimer](#sec-1)
-- [Objective](#sec-2)
-- [Pre requisites](#sec-3)
-- [In pratice: OVH cloud: public instances](#sec-4)
-- [Going Further](#sec-5)
+- [Objective](#sec-1)
+- [Pre requisites](#sec-2)
+- [In pratice: OVH cloud: public instances](#sec-3)
+- [Going Further](#sec-4)
 
 
-# Disclaimer<a id="sec-1"></a>
-
-This [document](unikernels.md) is written in org mode within emacs, then exported in various format such as markdown or html. As such, you may copy/paste code snippets in a shell terminal.
-
-But if you're editing this document within emacs, you can use it as a runnable notebook. You just have to hit `C-c C-c` on src blocks and code will be executed & outputted within the document, along with a shell buffer named `*journey*`.
-
-Don't forget to load babel support for shell lang by hitting `C-c C-c` on the following block:
-
-```emacs-lisp
-(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
-```
-
-& then try it:
-
-```bash
-echo 'vi vi vi is the editor of the Beast!'
-```
-
-<span class="underline">Tip</span>: you can hit `Tab` or `Shift-Tab` multiple times to collapse/uncollapse paragraphs.
-
-# Objective<a id="sec-2"></a>
+# Objective<a id="sec-1"></a>
 
 This document is the fifth part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create multiple openstack public instances on the region of your choice, using networking ports and custom ecurity groups.
 
-# Pre requisites<a id="sec-3"></a>
+# Pre requisites<a id="sec-2"></a>
 
 Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-# In pratice: OVH cloud: public instances<a id="sec-4"></a>
+# In pratice: OVH cloud: public instances<a id="sec-3"></a>
 
 Here's how to boot multiple instances on OVH public cloud behind a security group using terraform.
 
@@ -234,7 +213,7 @@ terraform destroy -force
     
     Destroy complete! Resources: 12 destroyed.
 
-# Going Further<a id="sec-5"></a>
+# Going Further<a id="sec-4"></a>
 
 Public instances are fun. But private instances are somewhat kind of useful. Next time we'll introduce private instances and the Vrack.
 

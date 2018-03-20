@@ -2,37 +2,6 @@
 #+AUTHOR: yann degat
 #+EMAIL: yann.degat@corp.ovh.com
 
-* Disclaimer
-
-This [[file:unikernels.org][document]] is written in org mode within emacs, then exported in 
-various format such as markdown or html.
-As such, you may  copy/paste code snippets in a shell terminal.
-
-But if you're editing this document within emacs, you can use it as a runnable notebook. 
-You just have to hit ~C-c C-c~ on src blocks and code will be executed &
-outputted within the document, along with a shell buffer named ~*journey*~.
-
-Don't forget to load babel support for shell lang by hitting ~C-c C-c~ on the
-following block:
-
-#+BEGIN_SRC emacs-lisp :results output none :eval never-export
-(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
-#+END_SRC
-
-& then try it:
-
-#+BEGIN_SRC bash :session *journey* :results output prepend pp :eval never-export
-echo 'vi vi vi is the editor of the Beast!'
-#+END_SRC
-
-#+RESULTS:
-: vi vi vi is the editor of the Beast!
-: Go enter the Holy Church of Emacs!
-
-_Tip_: you can hit ~Tab~ or ~Shift-Tab~ multiple times to collapse/uncollapse
-paragraphs.
-
-
 * Objective
 
 This document is the sixth part of a [[../0-simple-terraform/README.md][step by step guide]] on how to use 

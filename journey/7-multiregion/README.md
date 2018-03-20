@@ -1,31 +1,10 @@
-- [Disclaimer](#sec-1)
-- [Objective](#sec-2)
-- [Pre requisites](#sec-3)
-- [In pratice: OVH cloud: going multi regions](#sec-4)
-- [<a id="org29fdbd8"></a> Going Further](#sec-5)
+- [Objective](#sec-1)
+- [Pre requisites](#sec-2)
+- [In pratice: OVH cloud: going multi regions](#sec-3)
+- [<a id="org9355260"></a> Going Further](#sec-4)
 
 
-# Disclaimer<a id="sec-1"></a>
-
-This [document](unikernels.md) is written in org mode within emacs, then exported in various format such as markdown or html. As such, you may copy/paste code snippets in a shell terminal.
-
-But if you're editing this document within emacs, you can use it as a runnable notebook. You just have to hit `C-c C-c` on src blocks and code will be executed & outputted within the document, along with a shell buffer named `*journey*`.
-
-Don't forget to load babel support for shell lang by hitting `C-c C-c` on the following block:
-
-```emacs-lisp
-(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
-```
-
-& then try it:
-
-```bash
-echo 'vi vi vi is the editor of the Beast!'
-```
-
-<span class="underline">Tip</span>: you can hit `Tab` or `Shift-Tab` multiple times to collapse/uncollapse paragraphs.
-
-# Objective<a id="sec-2"></a>
+# Objective<a id="sec-1"></a>
 
 This document is the last part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). This guide will make use of almost everything that can be done with terraform on OVH cloud, namely booting:
 
@@ -40,11 +19,11 @@ This setup will make use of:
 -   the terraform [OVH provider](https://www.terraform.io/docs/providers/ovh/index.html)
 -   the [OVH network terraform module](https://registry.terraform.io/modules/ovh/publiccloud-network/ovh/)
 
-# Pre requisites<a id="sec-3"></a>
+# Pre requisites<a id="sec-2"></a>
 
 Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide. This time be sure you have retrieve an OVH API consumer key.
 
-# In pratice: OVH cloud: going multi regions<a id="sec-4"></a>
+# In pratice: OVH cloud: going multi regions<a id="sec-3"></a>
 
 Here's how to boot a multi region setup on OVH public cloud.
 
@@ -401,7 +380,7 @@ It was almost too easy, wasn't it?
 
 It seems that we're done with our journey. We hope that you'll enjoy our platform. Please feel free to come back at us and log issues if you encountered any problem during this journey or give us any feedback you'd like.
 
-We have some more things to share with you in [Going further](#org29fdbd8), but before, don't forget to destroy your instances:
+We have some more things to share with you in [Going further](#org9355260), but before, don't forget to destroy your instances:
 
 ```bash
 source ~/openrc.sh
@@ -430,7 +409,7 @@ terraform destroy -force -var os_tenant_id=$OS_TENANT_ID
     
     Destroy complete! Resources: 37 destroyed.
 
-# <a id="org29fdbd8"></a> Going Further<a id="sec-5"></a>
+# <a id="org9355260"></a> Going Further<a id="sec-4"></a>
 
 So this is the end of the journey. We've stepped through a lot of concepts and we hope you've learned a lot of things.
 

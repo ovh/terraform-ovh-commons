@@ -1,32 +1,11 @@
-- [Disclaimer](#sec-1)
-- [Objective](#sec-2)
-- [Pre requisites <code>[9/9]</code>](#sec-3)
-- [In pratice: Terraform basics: a very first step](#sec-4)
-- [Going Further](#sec-5)
-- [<a id="orgfec8a66"></a> Get an OVH API Consumer key](#sec-6)
+- [Objective](#sec-1)
+- [Pre requisites <code>[9/9]</code>](#sec-2)
+- [In pratice: Terraform basics: a very first step](#sec-3)
+- [Going Further](#sec-4)
+- [<a id="org0f9e15f"></a> Get an OVH API Consumer key](#sec-5)
 
 
-# Disclaimer<a id="sec-1"></a>
-
-This [document](unikernels.md) is written in org mode within emacs, then exported in various format such as markdown or html. As such, you may copy/paste code snippets in a shell terminal.
-
-But if you're editing this document within emacs, you can use it as a runnable notebook. You just have to hit `C-c C-c` on src blocks and code will be executed & outputted within the document, along with a shell buffer named `*journey*`.
-
-Don't forget to load babel support for shell lang by hitting `C-c C-c` on the following block:
-
-```emacs-lisp
-(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
-```
-
-& then try it:
-
-```bash
-echo 'vi vi vi is the editor of the Beast!'
-```
-
-<span class="underline">Tip</span>: you can hit `Tab` or `Shift-Tab` multiple times to collapse/uncollapse paragraphs.
-
-# Objective<a id="sec-2"></a>
+# Objective<a id="sec-1"></a>
 
 This document is the first part of an 8 parts journey that will provide you a step by step guide on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will guide you through a very simple terraform script that creates an object storage swift container to a full multi region HA setup using terraform modules provided by OVH.
 
@@ -36,7 +15,7 @@ It will also covers the very basic features of the [terraform](https://www.terra
 
 According to your level of knowledge of our platform and the [terraform](https://www.terraform.io/downloads.html) tool, feel free to skip the first steps.
 
-# Pre requisites <code>[9/9]</code><a id="sec-3"></a>
+# Pre requisites <code>[9/9]</code><a id="sec-2"></a>
 
 Please make sure before going any further that all the following pre requisites are met on your side: ,
 
@@ -48,9 +27,9 @@ Please make sure before going any further that all the following pre requisites 
 -   [X] install the openstack cli on your target host (`pip install python-openstackclient`) (optional but very useful as we'll see in the examples)
 -   [X] order a vrack (starting step 6)
 -   [X] attach your vrack to your openstack project (starting step 6)
--   [X] get an [ovh api consumer key](#orgfec8a66) (required for the multiregion setup on step 8)
+-   [X] get an [ovh api consumer key](#org0f9e15f) (required for the multiregion setup on step 8)
 
-# In pratice: Terraform basics: a very first step<a id="sec-4"></a>
+# In pratice: Terraform basics: a very first step<a id="sec-3"></a>
 
 The first 3 steps of the journey are pure [terraform](https://www.terraform.io/downloads.html) basic reminders. This step will help you create an openstack swift container on the region of your choice.
 
@@ -191,13 +170,13 @@ Result is empty, as expected. And that's it!
 
 OH! One more thing! Have you noticed the `terraform.tfstate*` files in your directory? Well, we shall talk about these in the next chapter.
 
-# Going Further<a id="sec-5"></a>
+# Going Further<a id="sec-4"></a>
 
 You can now jump to the [second step](../1-simple-terraform-vars/README.md) of our journey introducing vars and outputs.
 
 Of course, if you want to deep dive into terraform, you can also read the official [guides](https://www.terraform.io/guides/index.html) & [docs](https://www.terraform.io/docs/index.html).
 
-# <a id="orgfec8a66"></a> Get an OVH API Consumer key<a id="sec-6"></a>
+# <a id="org0f9e15f"></a> Get an OVH API Consumer key<a id="sec-5"></a>
 
 To be able to make API calls against the OVH API, you have to get credentials. To do so, you have to go through the following steps
 
