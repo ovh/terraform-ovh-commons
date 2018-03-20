@@ -15,7 +15,7 @@ We provide a step-by-step guide on how to use [Terraform](https://www.terraform.
 - [OVH terraform modules](https://github.com/ovh/terraform-ovh-commons/tree/master/journey/6-intro-modules/README.md)
 - [OVH multi region infrastructure](https://github.com/ovh/terraform-ovh-commons/tree/master/journey/7-multiregion/README.md)
 
-# ORG Mode READMEs
+# Emacs orgmode READMEs
 
 Most READMEs are written in org mode within emacs, then exported in various format such as markdown or html. As such, you may copy/paste code snippets in a shell terminal.
 
