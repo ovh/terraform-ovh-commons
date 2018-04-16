@@ -1,5 +1,4 @@
-BASEDIR=$(dirname $0)
-CATALOG=$BASEDIR/.catalog.json
+CATALOG=${CATALOG:-$(pwd)/.catalog.json}
 
 function auth(){
     RESP=$(curl -iqs https://auth.cloud.ovh.net/v3/auth/tokens \
