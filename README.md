@@ -15,16 +15,20 @@ This is mainly for learning purpose but the use case presented can be use to dep
 - [Setup and configuration](./journey/0-simple-terraform/README.md)
 - [Variables and outputs](./journey/1-simple-terraform-vars/README.md)
 - [State and best practices](./journey/2-simple-terraform-state/README.md)
+
 **Terraforming OVH Public Cloud resources**
 - [Creating your first instance](./journey/3-simple-public-instance/README.md)
 - [Advanced instance setings](./journey/4-advanced-public-instances/README.md)
+
 **From test to production environments**
 - [Secure your instances](./journey/5-private-instances/README.md)
 - [Multiple environments, manage modules](./journey/6-intro-modules/README.md)
 - [Deploy a multi-region architecture](./journey/7-multiregion/README.md)
+
 **Moving forward with Terraform best practices**
 - WIP: Versionning
 - WIP: Workspace
+
 **Scalling and rolling upgrade, let the magic happen**
 - WIP: Scale Up/Down
 - WIP: Rolling Upgrade
