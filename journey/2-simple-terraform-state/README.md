@@ -6,7 +6,7 @@
 
 # Objective<a id="sec-1"></a>
 
-This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time by introducing terraform state management.
+This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time by introducing terraform state management and terraform workspaces.
 
 # Pre requisites<a id="sec-2"></a>
 
@@ -30,13 +30,62 @@ Moreover, what happens if you're not the one and only maintainer of the infrastr
 
 Well here's how you can answer these question with terraform primitives such as terraform [remote backends](https://www.terraform.io/intro/getting-started/remote.html).
 
-Add this snippet in a `.tf` file:
+Add this snippet in a `main.tf` file:
 
 ```terraform
 terraform {
   backend "swift" {
     container = "demo-remote-state"
   }
+}
+
+provider "openstack" {
+  region = "${var.region}"
+}
+
+resource "openstack_objectstorage_container_v1" "container" {
+  region         = "${var.region}"
+  name           = "${var.name}"
+}
+```
+
+Vars & outputs remains just as before:
+
+```terraform
+variable "region" {
+  description = "The id of the openstack region"
+  default = "GRA3"
+}
+
+variable "name" {
+  description = "The name of the swift container for the demo"
+  default = "demo"
+}
+```
+
+```terraform
+output "helper" {
+  description = "human friendly helper"
+  value = <<DESC
+You can now use your swift container as a terraform remote state backend, such as:
+---
+terraform {
+  backend "swift" {
+    container = "${openstack_objectstorage_container_v1.container.name}"
+  }
+}
+---
+
+and reference state outputs with:
+---
+data "terraform_remote_state" "foo" {
+  backend = "swift"
+  config {
+    container = "${openstack_objectstorage_container_v1.container.name}"
+  }
+}
+---
+DESC
 }
 ```
 
