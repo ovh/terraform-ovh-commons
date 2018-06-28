@@ -6,7 +6,7 @@
 
 # Objective<a id="sec-1"></a>
 
-This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com//public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time by introducing terraform state management.
+This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/world/public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time by introducing terraform state management.
 
 # Pre requisites<a id="sec-2"></a>
 
