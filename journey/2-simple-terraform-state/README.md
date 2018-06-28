@@ -1,18 +1,18 @@
 - [Objective](#sec-1)
 - [Pre requisites](#sec-2)
-- [In pratice: Terraform basics: terraform state 3/3](#sec-3)
+- [In pratice: Terraform basics: terraform state](#sec-3)
 - [Going Further](#sec-4)
 
 
 # Objective<a id="sec-1"></a>
 
-This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time by introducing terraform state management.
+This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com//public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time by introducing terraform state management.
 
 # Pre requisites<a id="sec-2"></a>
 
 Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-# In pratice: Terraform basics: terraform state 3/3<a id="sec-3"></a>
+# In pratice: Terraform basics: terraform state<a id="sec-3"></a>
 
 We're getting to the last step of the basics of terraform on OVH public cloud. This step will show you how terraform handles and manages its state.
 
