@@ -1,4 +1,5 @@
 provider "openstack" {
+  auth_url  = "https://auth.cloud.ovh.net/v2.0/"
   region = "${var.region}"
 }
 
