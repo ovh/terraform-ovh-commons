@@ -25,7 +25,7 @@ Please make sure before going any further that all the following pre requisites 
 - Register an [OVH account](https://www.ovh.com/world/support/new_nic.xml)
 - Order a Public Cloud project
 - Create an [OpenStack user](https://www.youtube.com/watch?v=BIMb0iR1YhY)
-- Download openrc in keystone v3 format TODO
+- Download openrc
 - Install the [Terraform binary](https://www.terraform.io/downloads.html) (version >= 0.10.3) according to your OS
 - Install the openstack cli on your target host (`pip install python-openstackclient`) (optional but very useful as we'll see in the examples)
 
@@ -59,7 +59,7 @@ A "tf" file is a script that terraform will take as input to apply the configura
 
 ```terraform
 provider "openstack" {
-  auth_url  = "https://auth.cloud.ovh.net/v3/" 
+  auth_url  = "https://auth.cloud.ovh.net/v2.0/" 
 }
 
 resource "openstack_objectstorage_container_v1" "backend" {
