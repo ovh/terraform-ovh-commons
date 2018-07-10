@@ -1,37 +1,37 @@
 - [Objective](#sec-1)
-- [Pre requisites <code>[9/9]</code>](#sec-2)
+- [Pre requisites](#sec-2)
 - [In pratice: Terraform basics: a very first step](#sec-3)
 - [Going Further](#sec-4)
-- [<a id="org0f9e15f"></a> Get an OVH API Consumer key](#sec-5)
 
 
 # Objective<a id="sec-1"></a>
 
-This document is the first part of an 8 parts journey that will provide you a step by step guide on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will guide you through a very simple terraform script that creates an object storage swift container to a full multi region HA setup using terraform modules provided by OVH.
+This document is the first part of a multi-parts journey that will provide you a step by step guide on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/). It will guide you through a very simple terraform script that creates an object storage Swift container to a full multi region HA setup using terraform modules provided by OVH. 
 
-In the end, it can help you better understand complex terraform modules such as the [Consul](https://registry.terraform.io/modules/ovh/publiccloud-consul/ovh/0.1.3) or the [Kubernetes](https://registry.terraform.io/modules/ovh/publiccloud-k8s/ovh) modules and thus serve as an introduction to those modules.
+It will also covers the very basic features of the [Terraform](https://www.terraform.io/downloads.html) tool, such as terraform scripts, managing state, modules, &#x2026;
 
-It will also covers the very basic features of the [terraform](https://www.terraform.io/downloads.html) tool, such as terraform scripts, managing state, modules, &#x2026;
+In the end, you'll have learnt:
+- the Terraform best practices
+- how to use the OpenStack resources on OVH Public Cloud
+- how to use OVH specific resources such as domains
+- how to design and build a moderne infrastructure
 
-According to your level of knowledge of our platform and the [terraform](https://www.terraform.io/downloads.html) tool, feel free to skip the first steps.
+According to your level of knowledge of our platform and the [Terraform](https://www.terraform.io/downloads.html) tool, feel free to skip the first steps.
 
-# Pre requisites <code>[9/9]</code><a id="sec-2"></a>
+# Pre requisites<a id="sec-2"></a>
 
-Please make sure before going any further that all the following pre requisites are met on your side: ,
+Please make sure before going any further that all the following pre requisites are met on your side:
 
--   [X] register an ovh account
--   [X] order a public cloud project
--   [X] create an openstack user
--   [X] download openrc in keystone v3 format
--   [X] install the [terraform binary](https://www.terraform.io/downloads.html) (version >= 0.10.3) according to your OS
--   [X] install the openstack cli on your target host (`pip install python-openstackclient`) (optional but very useful as we'll see in the examples)
--   [X] order a vrack (starting step 6)
--   [X] attach your vrack to your openstack project (starting step 6)
--   [X] get an [ovh api consumer key](#org0f9e15f) (required for the multiregion setup on step 8)
+- Register an [OVH account](https://www.ovh.com/world/support/new_nic.xml)
+- Order a Public Cloud project
+- Create an [OpenStack user](https://www.youtube.com/watch?v=BIMb0iR1YhY)
+- Download openrc
+- Install the [Terraform binary](https://www.terraform.io/downloads.html) (version >= 0.10.3) according to your OS
+- Install the openstack cli on your target host (`pip install python-openstackclient`) (optional but very useful as we'll see in the examples)
 
 # In pratice: Terraform basics: a very first step<a id="sec-3"></a>
 
-The first 3 steps of the journey are pure [terraform](https://www.terraform.io/downloads.html) basic reminders. This step will help you create an openstack swift container on the region of your choice.
+The first 3 steps of the journey are pure [Terraform](https://www.terraform.io/downloads.html) basic reminders. This step will help you to create an OpenStack Swift container on the region of your choice.
 
 First, if it hasn't already been done, download the terraform binany for your platform of choice:
 
@@ -55,29 +55,30 @@ find .
     .
     ./main.tf
 
-You should see a directory with a single `main.tf` file.
-
 A "tf" file is a script that terraform will take as input to apply the configuration you have described in it. Let's see how it looks:
 
 ```terraform
+provider "openstack" {
+  auth_url  = "https://auth.cloud.ovh.net/v2.0/" 
+}
+
 resource "openstack_objectstorage_container_v1" "backend" {
-  region         = "SBG3"
   name           = "demo-simple-terraform" 
 }
 ```
 
-The script describes a single resource of type `openstack\_objectstorage\_container\_v1` with the id `backend`. It has 2 attributes: a name and a region.
+The script describes a **provider**, here it's OpenStack with the authentication URL and a single **resource** of type `openstack\_objectstorage\_container\_v1` with the id `backend`.
 
-We will apply this script in a few minutes but first, lets look at what Openstack Swift containers we already have on the `SBG3` region.
+We will apply this script in a few minutes but first, lets look at what OpenStack Swift containers we already have.
 
 ```bash
 source ~/openrc.sh
-openstack --os-region-name SBG3 container list
+openstack container list
 ```
 
 Result is empty. Good. If it's not then you should see your existing containers listed.
 
-Notice the `source` command above which will load your Openstack credentials in your shell environment. This line will be headed in all the following code snippets as a reminder. You may want to make it point to your openrc.sh file path.
+Notice the `source` command above which will load your OpenStack credentials in your shell environment. The OpenStack provider entry should contain much more information, those which are missing are taken from the environment variables. This line will be headed in all the following code snippets as a reminder. You may want to make it point to your openrc.sh file path.
 
 We can apply our configuration
 
@@ -116,7 +117,7 @@ Great, the container seems to have been created. Let's check this by listing our
 
 ```bash
 source ~/openrc.sh
-openstack --os-region-name SBG3 container list
+openstack container list
 ```
 
     +-----------------------+
@@ -163,46 +164,10 @@ Now let's check our containers again:
 
 ```bash
 source ~/openrc.sh
-openstack --os-region-name SBG3 container list
+openstack container list
 ```
 
 Result is empty, as expected. And that's it!
 
-OH! One more thing! Have you noticed the `terraform.tfstate*` files in your directory? Well, we shall talk about these in the next chapter.
+OH! One more thing! Have you noticed the `terraform.tfstate*` files in your directory? Well, we shall talk about these in the [next chapter](../1-simple-terraform-vars).
 
-# Going Further<a id="sec-4"></a>
-
-You can now jump to the [second step](../1-simple-terraform-vars/README.md) of our journey introducing vars and outputs.
-
-Of course, if you want to deep dive into terraform, you can also read the official [guides](https://www.terraform.io/guides/index.html) & [docs](https://www.terraform.io/docs/index.html).
-
-# <a id="org0f9e15f"></a> Get an OVH API Consumer key<a id="sec-5"></a>
-
-To be able to make API calls against the OVH API, you have to get credentials. To do so, you have to go through the following steps
-
--   Register an app on ovh api You first have to create an app on the following [page](https://eu.api.ovh.com/createApp/).
--   Then you can, after having replaced `myapplicationkey` by your actual key, generate a consumer key by running the following command:
-    
-    ```bash
-    curl -XPOST -H"X-Ovh-Application: myapplicationkey" -H "Content-type: application/json" \
-    https://eu.api.ovh.com/1.0/auth/credential  -d '{
-      "accessRules": [
-          { "method": "GET", "path": "/*" },
-          { "method": "PUT", "path": "/*" },
-          { "method": "POST", "path": "/*" },
-          { "method": "DELETE", "path": "/*" }
-      ]
-    }'
-    ```
-    
-        {"validationUrl":"https://eu.api.ovh.com/auth/?credentialToken=xxxyyyyzzzz","consumerKey":"myconsumerkey","state":"pendingValidation"}
-
--   The last command will output a JSON document containing your consumer key and a url you have to visit to activate the consumer key.
--   Once you have validated your consumer key, you can edit an `~/ovhrc` file and fill it by replacing the according values:
-    
-    ```bash
-    export OVH_ENDPOINT="ovh-eu"
-    export OVH_APPLICATION_KEY="myapplicationkey"
-    export OVH_APPLICATION_SECRET="myapplicationsecret"
-    export OVH_CONSUMER_KEY="myconsumerkey"
-    ```
