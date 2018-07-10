@@ -1,0 +1,45 @@
+/* General */
+
+body {
+    font-weight: 300;
+}
+
+.max-width {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.clear-padding {
+    padding: 0 !important;
+}
+
+/* Header */
+
+.brand-logo {
+    font-weight: 400;
+    font-size: 1.7rem !important;
+}
+
+/* Article */
+
+.article-image {
+    width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50%;
+    padding-top: 42%;
+}
+
+.article-meta-author-name {
+    font-weight: 500;
+}
+
+.article-meta-container {
+    margin-bottom: 16px;
+}
+
+/* Figure */
+
+figure>img {
+    width: 100%;
+}
