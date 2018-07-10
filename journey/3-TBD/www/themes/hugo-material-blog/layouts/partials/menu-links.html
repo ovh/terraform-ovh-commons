@@ -1,0 +1,11 @@
+{{ $name := .name }}
+{{ with .menu }}
+<h5 class="black-text">{{ $name }}</h5>
+<ul>
+    {{ range . }}
+    <li>
+        <a class="grey-text text-darken-4" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+    </li>
+    {{ end }}
+</ul>
+{{ end }}

@@ -1,0 +1,56 @@
+{{ define "menu-item" }}
+<li>
+    <a class="black-text" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+</li>
+{{ end }}
+
+{{ define "nav-menu" }}
+    {{ range $index, $menu := .Site.Menus.main }}
+        {{ if $menu.HasChildren }}
+            <ul id="{{ $.Scratch.Get "id" }}-{{ $index }}" class="dropdown-content">
+                {{ range $menu.Children }}
+                    {{ block "menu-item" . }}{{ end }}
+                {{ end }}
+            </ul>
+            <li>
+                <a class="dropdown-button black-text" href="#!" data-activates="{{ $.Scratch.Get "id" }}-{{ $index }}">{{ $menu.Name }}
+                    <i class="material-icons right">arrow_drop_down</i>
+                </a>
+            </li>
+        {{ else }}
+            {{ block "menu-item" $menu }}{{ end }}
+        {{ end }}
+    {{ end }}
+    {{ $.Scratch.Delete "id" }}
+{{ end }}
+
+<nav class="white" role="navigation">
+    <div class="row max-width">
+        <div class="col s12 l10 offset-l1">
+            <!-- Hamburger menu -->
+            <a href="#" data-activates="nav-mobile" class="button-collapse black-text">
+                <i class="material-icons">menu</i>
+            </a>
+
+            <!-- Mobile sidenav -->
+            <ul id="nav-mobile" class="side-nav">
+                {{ $.Scratch.Set "id" "dropdown-header-mobile" }}
+                {{ block "nav-menu" . }}{{ end }}
+            </ul>
+
+            <!-- Brand -->
+            <a href="{{ .Site.BaseURL | relLangURL }}" class="brand-logo grey-text text-darken-3">{{ partial "brand" . }}</a>
+
+            <!-- Navigation container -->
+            <div class="nav-wrapper">
+
+                <!-- Menu -->
+                <ul class="right hide-on-med-and-down">
+                    {{ $.Scratch.Set "id" "dropdown-header-desktop" }}
+                    {{ block "nav-menu" . }}{{ end }}
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</nav>

@@ -35,3 +35,7 @@ id_rsa*
 
 # org mode tmp files
 *.tex
+
+#editors
+*~
+.\#*
