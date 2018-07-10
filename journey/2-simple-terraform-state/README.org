@@ -7,7 +7,7 @@
 This document is the third part of a [[../0-simple-terraform/README.md][step by step guide]] on how to use 
 the [[https://terraform.io][Hashicorp Terraform]] tool with [[https://www.ovh.com/fr/public-cloud/instances/][OVH Cloud]]. It will help you create 
 an openstack swift container on the region of your choice, but this
-time by introducing terraform state management.
+time by introducing terraform state management and terraform workspaces.
 
 
 * Pre requisites
@@ -45,12 +45,61 @@ files with your team mates, and be very careful not to apply a change at the sam
 Well here's how you can answer these question with terraform primitives such as 
 terraform [[https://www.terraform.io/intro/getting-started/remote.html][remote backends]].
 
-Add this snippet in a ~.tf~ file:
-#+BEGIN_SRC terraform :eval never-export
+Add this snippet in a ~main.tf~ file:
+#+BEGIN_SRC terraform :eval never-export :tangle main.tf
 terraform {
   backend "swift" {
     container = "demo-remote-state"
   }
+}
+
+provider "openstack" {
+  region = "${var.region}"
+}
+
+resource "openstack_objectstorage_container_v1" "container" {
+  region         = "${var.region}"
+  name           = "${var.name}"
+}
+#+END_SRC
+
+Vars & outputs remains just as before:
+
+#+BEGIN_SRC terraform :eval never-export :tangle variables.tf
+variable "region" {
+  description = "The id of the openstack region"
+  default = "GRA3"
+}
+
+variable "name" {
+  description = "The name of the swift container for the demo"
+  default = "demo"
+}
+#+END_SRC
+
+#+BEGIN_SRC terraform :eval never-export :tangle outputs.tf
+output "helper" {
+  description = "human friendly helper"
+  value = <<DESC
+You can now use your swift container as a terraform remote state backend, such as:
+---
+terraform {
+  backend "swift" {
+    container = "${openstack_objectstorage_container_v1.container.name}"
+  }
+}
+---
+
+and reference state outputs with:
+---
+data "terraform_remote_state" "foo" {
+  backend = "swift"
+  config {
+    container = "${openstack_objectstorage_container_v1.container.name}"
+  }
+}
+---
+DESC
 }
 #+END_SRC
 
@@ -112,6 +161,11 @@ machine with credentials accessing the same project on the same openstack region
 should have access to this ~tfstate~ file.
 
 Notice: terraform maintains a local copy of this file in the ~.terraform~ directory.
+
+* Workspaces
+
+Terraform also allows you to manage your environments with the `workspaces` feature.
+You can easily switch from one environment to the other by a simple command.
 
 
 * Going Further

@@ -7,4 +7,3 @@ variable "name" {
   description = "The name of the swift container for the demo"
   default = "demo"
 }
-

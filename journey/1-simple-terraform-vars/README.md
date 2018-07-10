@@ -6,7 +6,7 @@
 
 # Objective<a id="sec-1"></a>
 
-This document is the second part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create an openstack swift container on the region of your choice, but this time with more advanced features of terraform, such as multiple `tf` files, variables, interpolation and outputs.
+This document is the second part of a [step by step guide](../0-simple-terraform/README.md) on how to use the [Hashicorp Terraform](https://terraform.io) tool with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/). It will help you create an OpenStack Swift container on the region of your choice, but this time with more advanced features of terraform, such as multiple `tf` files, variables, interpolation and outputs.
 
 # Pre requisites<a id="sec-2"></a>
 
@@ -34,12 +34,12 @@ Here's the content of the `variables.tf`:
 
 ```terraform
 variable "region" {
-  description = "The id of the openstack region"
+  description = "The id of the OpenStack region"
   default = "GRA3"
 }
 
 variable "name" {
-  description = "The name of the swift container for the terraform backend remote state"
+  description = "The name of the Swift container for the terraform backend remote state"
   default = "demo-journey"
 }
 ```
@@ -48,6 +48,7 @@ Alright. So now we know how to declare variables with default values and adding 
 
 ```terraform
 provider "openstack" {
+  auth_url  = "https://auth.cloud.ovh.net/v2.0/"
   region = "${var.region}"
 }
 
@@ -58,8 +59,6 @@ resource "openstack_objectstorage_container_v1" "container" {
 ```
 
 Here we can see basic "interpolation" features of terraform. Full documentation is available [here](https://www.terraform.io/docs/configuration/interpolation.html).
-
-We also introduced the "openstack" provider, which had implicit settings based on the openrc exported variables in the first example.
 
 Here we force the target region to the input variable `region`. We consider this as a best practice because relying on the openrc `OS_REGION_NAME` exported environment variable is error prone.
 
