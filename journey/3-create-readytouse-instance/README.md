@@ -60,7 +60,7 @@ As you can see, we specify the version of the provider to freez it in our code. 
 
 Now let's add a network port, a keypair and the instance. As you can imagine, we are touching the dependancy notions. To start an instance which require an ssh keypair and a network port, terraform will first create the keypair and the port. Once it's available, terraform will create the instance. Those dependencies are implicit, terraform will create a dependancy tree before starting anything.
 
-````terraform
+```terraform
 data "openstack_networking_network_v2" "public_a" {
   name     = "Ext-Net"
   provider = "openstack.region_a"
@@ -259,6 +259,42 @@ This last template is based on a local file which can be customize before using 
 ```
 
 As you can see, the variable '${server_name}' will be replaced by the terraform variable '${var.name}.${var.zone}'.
+
+## Pushing more content on the instance
+
+User data is a good solution to create simple file in an instance, but if you have more content to add on your system, you probably need to find another way to do it. This is our case for the whole 'www/public' local folder we want to add in the instance to be served by Apache.
+
+Here come the terraform provisioners. It a couple of properties to define an scp command based on a trigger, some connection parameters and the content to push.
+
+Still in 'main.tf', we'll add the following:
+
+```terraform
+resource "null_resource" "provision_a" {
+  count = "${var.count}"
+
+  triggers {
+    id = "${openstack_compute_instance_v2.nodes_a.*.id[count.index]}"
+  }
+
+  connection {
+    host = "${openstack_compute_instance_v2.nodes_a.*.access_ip_v4[count.index]}"
+    user = "ubuntu"
+  }
+
+  provisioner "file" {
+    source      = "./www/public"
+    destination = "/home/ubuntu/${var.name}"
+  }
+}
+
+# trick to filter ipv6 addrs
+data "template_file" "ipv4_addr_a" {
+  count    = "${var.count}"
+  template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_a.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
+}
+```
+
+Simple, right? When terraform will find a the resource 'openstack_compute_instance_v2.nodes_a.*.id[count.index]' ready, it will scp the 'www/public' folder in '/home/ubuntu/${var.name}' using the ubuntu user.
 
 ## Run Terraform
 
