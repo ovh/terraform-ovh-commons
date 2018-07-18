@@ -1,0 +1,17 @@
+name = "Hugo Material Blog"
+license = "MIT"
+licenselink = "https://github.com/Xzya/hugo-material-blog/blob/master/LICENSE.md"
+description = ""
+homepage = "https://github.com/Xzya/hugo-material-blog"
+tags = ["blog", "material design", "multilingual", "clean", "google analytics", "responsive"]
+features = ["blog"]
+min_version = "0.38.1"
+
+[author]
+  name = "Mihail Cristian Dumitru"
+  homepage = "https://github.com/Xzya"
+
+[original]
+  author =  ""
+  homepage = ""
+  repo = ""

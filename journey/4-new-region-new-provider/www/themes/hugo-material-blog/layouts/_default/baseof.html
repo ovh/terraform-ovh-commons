@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {{ partial "head-meta" . }}
+
+    <meta name="description" content="{{ .Description }}">
+    <link rel="canonical" href="{{ .Permalink }}">
+
+    {{ $title := delimit (slice .Title "&middot;" .Site.Title) " " }}
+    <title>{{ $title }}</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <link href="{{ .Site.BaseURL }}css/style.css" rel="stylesheet">
+
+    {{ if .RSSLink }}
+      <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ $title }}" />
+      <link href="{{ .RSSLink }}" rel="feed" type="application/rss+xml" title="{{ $title }}" />
+    {{ end }}
+
+    {{ template "_internal/google_analytics_async.html" . }}
+
+    {{ partial "head-custom.html" . }}
+  </head>
+  <body>
+    {{ block "header" . }}
+      {{ partial "header" . }}
+    {{ end }}
+
+    {{ block "main" . }}
+      <!-- The part of the page that begins to differ between templates -->
+    {{ end }}
+
+    {{ block "footer" . }}
+      {{ partial "footer" . }}
+    {{ end }}
+
+    <!--  Scripts-->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <script src="{{ .Site.BaseURL }}js/script.js"></script>
+  </body>
+</html>
