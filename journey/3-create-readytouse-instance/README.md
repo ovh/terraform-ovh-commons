@@ -286,34 +286,106 @@ resource "null_resource" "provision_a" {
     destination = "/home/ubuntu/${var.name}"
   }
 }
-
-# trick to filter ipv6 addrs
-data "template_file" "ipv4_addr_a" {
-  count    = "${var.count}"
-  template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_a.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
-}
 ```
 
 Simple, right? When terraform will find a the resource 'openstack_compute_instance_v2.nodes_a.*.id[count.index]' ready, it will scp the 'www/public' folder in '/home/ubuntu/${var.name}' using the ubuntu user.
 
 ## Run Terraform
 
-Now we can run terraform init:
+Now it's time to run terraform. As we said, there are dependency and we can ask terraform to show us what is going to be done before doing it:
 
 ```bash
-source ~/openrc.sh
-terraform init
+$ terraform plan -var zone=iac.ovh
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
 
-Initializing the backend...
+data.template_file.myblog_conf: Refreshing state...
+data.http.myip: Refreshing state...
+data.openstack_networking_network_v2.public_a: Refreshing state...
+data.template_file.setup: Refreshing state...
+data.template_file.userdata: Refreshing state...
 
-Successfully configured the backend "swift"! Terraform will automatically
-use this backend unless the backend configuration changes.
-...
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  + null_resource.provision_a
+      id:                       <computed>
+      triggers.%:               <computed>
+
+  + openstack_compute_instance_v2.nodes_a                                                                                                                              [17/1133]
+      id:                       <computed>
+      access_ip_v4:             <computed>
+      access_ip_v6:             <computed>
+      all_metadata.%:           <computed>
+      availability_zone:        <computed>
+      flavor_id:                <computed>
+      flavor_name:              "s1-2"
+      force_delete:             "false"
+      image_id:                 <computed>
+      image_name:               "Ubuntu 18.04"
+      key_pair:                 "myblog"
+      name:                     "myblog_a_0"
+      network.#:                "1"
+      network.0.access_network: "true"
+      network.0.fixed_ip_v4:    <computed>
+      network.0.fixed_ip_v6:    <computed>
+      network.0.floating_ip:    <computed>
+      network.0.mac:            <computed>
+      network.0.name:           <computed>
+      network.0.port:           "${openstack_networking_port_v2.public_a.*.id[count.index]}"
+      network.0.uuid:           <computed>
+      region:                   <computed>
+      security_groups.#:        <computed>
+      stop_before_destroy:      "false"
+      user_data:                "8cdbaccddc891e59a2daa58b44af3ba0b5e15b02"
+
+  + openstack_compute_keypair_v2.keypair_a
+      id:                       <computed>
+      fingerprint:              <computed>
+      name:                     "myblog"
+      private_key:              <computed>
+      public_key:               "ssh-rsa .... \n"
+      region:                   <computed>
+
+  + openstack_networking_port_v2.public_a
+      id:                       <computed>
+      admin_state_up:           "true"
+      all_fixed_ips.#:          <computed>
+      all_security_group_ids.#: <computed>
+      device_id:                <computed>
+      device_owner:             <computed>
+      mac_address:              <computed>
+      name:                     "myblog_a_0"
+      network_id:               "ed0ab0c6-93ee-44f8-870b-d103065b1b34"
+      region:                   <computed>
+      tenant_id:                <computed>
+
+
+Plan: 4 to add, 0 to change, 0 to destroy.
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+```
+
+Now we can apply as it's proposed. Think about adding your ssh key in your agent before runing it.
+
+```bash
+$ eval $(ssh-agent)
+$ ssh-add
+$ terraform apply -auto-approve -var zone=iac.ovh
 ```
 
 # Going Further<a id="sec-5" name="sec-5"></a>
 
-We're finished with terraform basics on OVH. Now we'll go deeper into bootstrapping 
-real infrastructure, starting with a public cloud virtual machine.
+We're finished with the terraform first instance on OVH. Now we'll add some complexity using multi providers and multi regions.
 
-See you on [the fourth step](../3-simple-public-instance/README.md) of our journey.
+See you on [the fourth step](../4-new-region-new-provider/README.md) of our journey.

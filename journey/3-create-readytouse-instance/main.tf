@@ -129,10 +129,3 @@ resource "null_resource" "provision_a" {
     destination = "/home/ubuntu/${var.name}"
   }
 }
-
-# trick to filter ipv6 addrs 
-data "template_file" "ipv4_addr_a" {
-  count    = "${var.count}"
-  template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_a.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
-}
-
