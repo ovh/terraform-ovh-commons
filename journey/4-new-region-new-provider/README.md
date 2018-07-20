@@ -1,457 +1,341 @@
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#sec-1">1. Objective</a></li>
-<li><a href="#sec-2">2. Pre requisites</a></li>
-<li><a href="#sec-3">3. install custom providers</a>
-<ul>
-<li><a href="#sec-3-1">3.1. install acme provider</a></li>
-</ul>
-</li>
-<li><a href="#sec-4">4. In pratice: Terraform ???</a></li>
-<li><a href="#sec-5">5. Workspaces</a></li>
-<li><a href="#sec-6">6. Going Further</a></li>
-</ul>
-</div>
-</div>
+- [Objective](#sec-1)
+- [Pre requisites](#sec-2)
+- [In pratice](#sec-4)
+- [Going Further](#sec-5)
 
 
 # Objective<a id="sec-1" name="sec-1"></a>
 
-This document is the third part of a [step by step guide](../0-simple-terraform/README.md) on how to use 
-the [Hashicorp Terraform](https://terraform.io) tool with [OVH Cloud](https://www.ovh.com/fr/public-cloud/instances/). It will help you create 
-an openstack swift container on the region of your choice, but this
-time by introducing terraform state management and terraform workspaces.
+This document is the fourth part of a [step by step guide](../0-simple-terraform/README.md) on how to use 
+the [Hashicorp Terraform](https://terraform.io) tool with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/). 
+Previously we created a Public Cloud instance to host a static blog based on [hugo](https://gohugo.io/getting-started/quick-start/) working with post-boot scripts.
+Now we'll go a bit futher adding TLS security and redondency accrose regions using Roud Robin DNS. We'll start our first high availability infrastructure. For that, we'll see:
+- how to generate a TLS certificat with terraform
+- how to manage two instances in two regions
+- how to live manage the DNS using the OVH provider in terraform in order to round robin DNS accros regions.
+
+Every documented part here should be considered as an addition of the previous steps.
 
 # Pre requisites<a id="sec-2" name="sec-2"></a>
 
 Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-Build your blog on whatever techno you like. As this is not the main purpose of 
-this tutorial, we'll provide you a simple static blog content generated with 
-[hugo](https://gohugo.io/getting-started/quick-start/), a popular static website generator.
+In addition of the previous pre-requisites, we need to indroduce the ACME Let's Encrypt provider to manage the TLS certificat. The ACME provider is not already merged in the upstream terraform code, so you have to install it as a side plugin.
 
-First follow the getting started guide to install hugo on your system.
-Then generate a website with some content
+## Installing the ACME teraform module
 
-    curl -Lo /tmp/example.zip https://github.com/Xzya/hugo-material-blog/archive/master.zip
-    unzip /tmp/example.zip -d /tmp
-    mv /tmp/hugo-material-blog-master/exampleSite ./www
-    mkdir ./www/themes
-    mv /tmp/hugo-material-blog-master ./www/themes/hugo-material-blog
+Installing a plugin for terraform is really simple:
 
-You can edit/remove/add some content, then generate your site 
+```bash
+mkdir -p ~/.terraform.d/plugins
+curl -Lo /tmp/terraform-provider-acme.zip \
+ https://github.com/vancluever/terraform-provider-acme/releases/download/v1.0.0/terraform-provider-acme_v1.0.0_linux_amd64.zip
+unzip  /tmp/terraform-provider-acme.zip -d /tmp
+mv /tmp/terraform-provider-acme ~/.terraform.d/plugins
+```
 
-    cd www && hugo
+# In pratice<a id="sec-4" name="sec-4"></a>
 
-Your webiste has been generated in the \`www/public\` directory
+## Generating the TLS certificat
 
-NB: you can preview your site by serving files with hugo:
+```terraform
+# letsencrypt acme challenge
+# Create the private key for the registration (not the certificate)
+resource "tls_private_key" "private_key" {
+  algorithm = "RSA"
+}
 
-    hugo server -b 0.0.0.0 -p 8080 -s www
+# Set up a registration using a private key from tls_private_key
+resource "acme_registration" "reg" {
+  server_url      = "https://acme-v01.api.letsencrypt.org/directory"
+  account_key_pem = "${tls_private_key.private_key.private_key_pem}"
+  email_address   = "${var.email}"
+}
 
-# install custom providers<a id="sec-3" name="sec-3"></a>
+# Create a certificate
+resource "acme_certificate" "certificate" {
+  server_url      = "https://acme-v01.api.letsencrypt.org/directory"
+  account_key_pem = "${tls_private_key.private_key.private_key_pem}"
+  common_name     = "${var.name}.${var.zone}"
 
-## Install Terraform acme provider
+  dns_challenge {
+    provider = "ovh"
+  }
 
-Each terraform provider extend the tool capabilities and there are a lot of possibilities. Here we'll add to terraform the capability to manage certificates using Let's Encrypt certificate authority. As ACME provider is not yet included in terraform upstream code (it should be in a near futur), we'll add it as a plugin.
+  registration_url = "${acme_registration.reg.id}"
+}
+```
 
-    mkdir -p ~/.terraform.d/plugins
-    curl -Lo /tmp/terraform-provider-acme.zip \
-     https://github.com/vancluever/terraform-provider-acme/releases/download/v1.0.0/terraform-provider-acme_v1.0.0_linux_amd64.zip
-    unzip  /tmp/terraform-provider-acme.zip -d /tmp
-    mv /tmp/terraform-provider-acme ~/.terraform.d/plugins
+## Adapting the 1rst instance to use the certificate
 
-Now we are ready to install hugo and TLS certificate in an instance. Let's do it.
+Of course we have to adapt a little bit the post install scripts to install and use the TLS certificate. Here are the changes required in the 1rst instance to configure the certificate.
 
-# In pratice: Terraform ???<a id="sec-4" name="sec-4"></a>
+Firstly, the user-data should be modified:
 
-Configure terraform providers and state storage
+```terraform
+data "template_file" "userdata" {
+  template = <<CLOUDCONFIG
+#cloud-config
 
-    terraform {
-      backend "swift" {
-        container = "demo-remote-state"
-      }
-    }
-    
-    provider "ovh" {
-      #  version  = "~> 0.3"
-      endpoint = "ovh-eu"
-    }
-    
-    provider "openstack" {
-      version     = "= 1.5"
-      region      = "${var.region_a}"
-      alias = "region_a"
-    }
-    
-    provider "openstack" {
-      version     = "= 1.5"
-      region      = "${var.region_b}"
-    
-      alias = "region_b"
-    }
+write_files:
+  - path: /etc/letsencrypt/cert.pem
+    permissions: '0600'
+    content: |
+      ${indent(6, acme_certificate.certificate.certificate_pem)}
+  - path: /etc/letsencrypt/key.pem
+    permissions: '0600'
+    content: |
+      ${indent(6, acme_certificate.certificate.private_key_pem)}
+  - path: /etc/letsencrypt/issuer.pem
+    permissions: '0600'
+    content: |
+      ${indent(6, acme_certificate.certificate.issuer_pem)}
+  - path: /tmp/setup/run.sh
+    permissions: '0755'
+    content: |
+      ${indent(6, data.template_file.setup.rendered)}
+  - path: /tmp/setup/myblog.conf
+    permissions: '0644'
+    content: |
+      ${indent(6, data.template_file.myblog_conf.rendered)}
+  - path: /tmp/setup/ports.conf
+    permissions: '0644'
+    content: |
+      # If you just change the port or add more ports here, you will likely also
+      # have to change the VirtualHost statement in
+      # /etc/apache2/sites-enabled/000-default.conf
+      Listen 80
+      <IfModule ssl_module>
+           Listen 0.0.0.0:443
+      </IfModule>
+      <IfModule mod_gnutls.c>
+           Listen 0.0.0.0:443
+      </IfModule>
+      # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 
-Vars & outputs remains just as before:
+  - path: /etc/systemd/network/30-ens3.network
+    permissions: '0644'
+    content: |
+      [Match]
+      Name=ens3
+      [Network]
+      DHCP=ipv4
 
-    variable "region_a" {
-      description = "The id of the first openstack region"
-      default = "DE1"
-    }
-    
-    variable "region_b" {
-      description = "The id of the second openstack region"
-      default = "WAW1"
-    }
-    
-    variable "name" {
-      description = "name of blog. Used to forge subdomain"
-      default = "myblog"
-    }
-    
-    variable "ssh_public_key" {
-      description = "The path of the ssh public key that will be used by ansible to provision the hosts"
-      default     = "~/.ssh/id_rsa.pub"
-    }
-    
-    variable "flavor_name" {
-      description = "flavor name of nodes."
-      default     = "s1-2"
-    }
-    
-    variable "count" {
-      description = "number of blog nodes per region"
-      default     = 1
-    }
-    
-    variable "zone" {
-      description = "the domain root zone"
-    }
-    
-    variable "email" {
-      description = "email for letsencrypt registration"
-    }
+runcmd:
+   - /tmp/setup/run.sh
+CLOUDCONFIG
+}
+```
 
-Generate lets encrypt certificate
+The template for the virtual host in Apache need some change too in order to use the .pem files. Remember, it was managed by a local template file "myblog.conf.tpl"
 
-    # letsencrypt acme challenge
-    # Create the private key for the registration (not the certificate)
-    resource "tls_private_key" "private_key" {
-      algorithm = "RSA"
-    }
-    
-    # Set up a registration using a private key from tls_private_key
-    resource "acme_registration" "reg" {
-      server_url      = "https://acme-v01.api.letsencrypt.org/directory"
-      account_key_pem = "${tls_private_key.private_key.private_key_pem}"
-      email_address   = "${var.email}"
-    }
-    
-    # Create a certificate
-    resource "acme_certificate" "certificate" {
-      server_url      = "https://acme-v01.api.letsencrypt.org/directory"
-      account_key_pem = "${tls_private_key.private_key.private_key_pem}"
-      common_name     = "${var.name}.${var.zone}"
-    
-      dns_challenge {
-        provider = "ovh"
-      }
-    
-      registration_url = "${acme_registration.reg.id}"
-    }
+```apache
+<IfModule mod_ssl.c>
+      <VirtualHost 0.0.0.0:80>
+         RewriteEngine On
+         RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+      </VirtualHost>
 
-Create the ports on Ext net to get public ips for your nodes
+      <VirtualHost 0.0.0.0:443>
+              ServerName ${server_name}
+              DocumentRoot /home/ubuntu/myblog
 
-    data "openstack_networking_network_v2" "public_a" {
-      name     = "Ext-Net"
-      provider = "openstack.region_a"
-    }
-    
-    resource "openstack_networking_port_v2" "public_a" {
-      count          = "${var.count}"
-      name           = "${var.name}_a_${count.index}"
-      network_id     = "${data.openstack_networking_network_v2.public_a.id}"
-      admin_state_up = "true"
-      provider       = "openstack.region_a"
-    }
-    
-    data "openstack_networking_network_v2" "public_b" {
-      name     = "Ext-Net"
-      provider = "openstack.region_b"
-    }
-    
-    resource "openstack_networking_port_v2" "public_b" {
-      count          = "${var.count}"
-      name           = "${var.name}_b_${count.index}"
-      network_id     = "${data.openstack_networking_network_v2.public_b.id}"
-      admin_state_up = "true"
-      provider       = "openstack.region_b"
-    }
+              <Directory /home/ubuntu/myblog>
+                  Options FollowSymLinks
+                  AllowOverride Limit Options FileInfo
+                  DirectoryIndex index.html
+                  Require all granted
+              </Directory>
 
-Then create the nodes:
+              ErrorLog $$$${APACHE_LOG_DIR}/error.log
+              CustomLog $$$${APACHE_LOG_DIR}/access.log combined
 
-    data "http" "myip" {
-      url = "https://api.ipify.org"
-    }
-    
-    resource "openstack_compute_keypair_v2" "keypair_a" {
-      name       = "${var.name}"
-      public_key = "${file(var.ssh_public_key)}"
-      provider   = "openstack.region_a"
-    }
-    
-    resource "openstack_compute_keypair_v2" "keypair_b" {
-      name       = "${var.name}"
-      public_key = "${file(var.ssh_public_key)}"
-      provider   = "openstack.region_b"
-    }
-    
-    data "template_file" "setup" {
-      template = <<SETUP
-    #!/bin/bash
-    
-    # install softwares & depencencies
-    apt update -y && apt install -y ufw apache2
-    
-    # setup firewall
-    ufw default deny
-    ufw allow in on ens3 proto tcp from 0.0.0.0/0 to 0.0.0.0/0 port 80
-    ufw allow in on ens3 proto tcp from 0.0.0.0/0 to 0.0.0.0/0 port 443
-    ufw allow in on ens3 proto tcp from ${trimspace(data.http.myip.body)}/32 to 0.0.0.0/0 port 22
-    ufw enable
-    
-    # setup apache2
-    cp /tmp/setup/myblog.conf /etc/apache2/sites-available/
-    cp /tmp/setup/ports.conf /etc/apache2
-    a2enmod ssl
-    a2enmod rewrite
-    a2ensite myblog
-    a2dissite 000-default
-    
-    # setup systemd services
-    systemctl enable apache2 ufw
-    systemctl restart apache2 ufw
-    SETUP
-    }
-    
-    data "template_file" "myblog_conf" {
-      template = "${file("${path.module}/myblog.conf.tpl")}"
-    
-      vars {
-        server_name = "${var.name}.${var.zone}"
-      }
-    }
-    
-    data "template_file" "userdata" {
-      template = <<CLOUDCONFIG
-    #cloud-config
-    
-    write_files:
-      - path: /etc/letsencrypt/cert.pem
-        permissions: '0600'
-        content: |
-          ${indent(6, acme_certificate.certificate.certificate_pem)}
-      - path: /etc/letsencrypt/key.pem
-        permissions: '0600'
-        content: |
-          ${indent(6, acme_certificate.certificate.private_key_pem)}
-      - path: /etc/letsencrypt/issuer.pem
-        permissions: '0600'
-        content: |
-          ${indent(6, acme_certificate.certificate.issuer_pem)}
-      - path: /tmp/setup/run.sh
-        permissions: '0755'
-        content: |
-          ${indent(6, data.template_file.setup.rendered)}
-      - path: /tmp/setup/myblog.conf
-        permissions: '0644'
-        content: |
-          ${indent(6, data.template_file.myblog_conf.rendered)}
-      - path: /tmp/setup/ports.conf
-        permissions: '0644'
-        content: |
-          # If you just change the port or add more ports here, you will likely also
-          # have to change the VirtualHost statement in
-          # /etc/apache2/sites-enabled/000-default.conf
-          Listen 80
-          <IfModule ssl_module>
-               Listen 0.0.0.0:443
-          </IfModule>
-          <IfModule mod_gnutls.c>
-               Listen 0.0.0.0:443
-          </IfModule>
-          # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
-    
-      - path: /etc/systemd/network/30-ens3.network
-        permissions: '0644'
-        content: |
-          [Match]
-          Name=ens3
-          [Network]
-          DHCP=ipv4
-    
-    runcmd:
-       - /tmp/setup/run.sh
-    CLOUDCONFIG
-    }
-    
-    resource "openstack_compute_instance_v2" "nodes_a" {
-      count       = "${var.count}"
-      name        = "${var.name}_a_${count.index}"
-      image_name  = "Ubuntu 18.04"
-      flavor_name = "${var.flavor_name}"
-      key_pair    = "${openstack_compute_keypair_v2.keypair_a.name}"
-      user_data   = "${data.template_file.userdata.rendered}"
-    
-      network {
-        access_network = true
-        port           = "${openstack_networking_port_v2.public_a.*.id[count.index]}"
-      }
-    
-      provider = "openstack.region_a"
-    }
-    
-    resource "openstack_compute_instance_v2" "nodes_b" {
-      count       = "${var.count}"
-      name        = "${var.name}_b_${count.index}"
-      image_name  = "Ubuntu 18.04"
-      flavor_name = "${var.flavor_name}"
-      key_pair    = "${openstack_compute_keypair_v2.keypair_b.name}"
-      user_data   = "${data.template_file.userdata.rendered}"
-    
-      network {
-        access_network = true
-        port           = "${openstack_networking_port_v2.public_b.*.id[count.index]}"
-      }
-    
-      provider = "openstack.region_b"
-    }
+              SSLEngine on
+              SSLCertificateFile /etc/letsencrypt/cert.pem
+              SSLCertificateKeyFile /etc/letsencrypt/key.pem
+              SSLCertificateChainFile /etc/letsencrypt/issuer.pem
+      </VirtualHost>
+</IfModule>
+```
 
-Great, now upload the website contents
+Now we have a single instance working with a TLS certificate. Let's do the same for a second instance in another region.
 
-    resource "null_resource" "provision_a" {
-      count = "${var.count}"
-    
-      triggers {
-        id = "${openstack_compute_instance_v2.nodes_a.*.id[count.index]}"
-      }
-    
-      connection {
-        host = "${openstack_compute_instance_v2.nodes_a.*.access_ip_v4[count.index]}"
-        user = "ubuntu"
-      }
-    
-      provisioner "file" {
-        source      = "./www/public"
-        destination = "/home/ubuntu/${var.name}"
-      }
-    }
-    
-    resource "null_resource" "provision_b" {
-      count = "${var.count}"
-    
-      triggers {
-        id = "${openstack_compute_instance_v2.nodes_b.*.id[count.index]}"
-      }
-    
-      connection {
-        host = "${openstack_compute_instance_v2.nodes_b.*.access_ip_v4[count.index]}"
-        user = "ubuntu"
-      }
-    
-      provisioner "file" {
-        source      = "./www/public"
-        destination = "/home/ubuntu/${var.name}"
-      }
-    }
+## Adding the B region with the B instance
 
-    # setup subdomain
-    data "ovh_domain_zone" "rootzone" {
-      name = "${var.zone}"
-    }
-    
-    # trick to filter ipv6 addrs 
-    data "template_file" "ipv4_addr_a" {
-      count    = "${var.count}"
-      template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_a.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
-    }
-    
-    data "template_file" "ipv4_addr_b" {
-      count    = "${var.count}"
-      template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_b.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
-    }
-    
-    resource "ovh_domain_zone_record" "subdomain_records_a" {
-      count     = "${var.count}"
-      zone      = "${data.ovh_domain_zone.rootzone.name}"
-      subdomain = "${var.name}"
-      fieldtype = "A"
-      target    = "${data.template_file.ipv4_addr_a.*.rendered[count.index]}"
-    }
-    
-    resource "ovh_domain_zone_record" "subdomain_records_b" {
-      count     = "${var.count}"
-      zone      = "${data.ovh_domain_zone.rootzone.name}"
-      subdomain = "${var.name}"
-      fieldtype = "A"
-      target    = "${data.template_file.ipv4_addr_b.*.rendered[count.index]}"
-    }
+We'll start by adding a new OpenStack provider targgeting a new region in 'main.tf'
 
-then run terraform init:
+```terraform
+provider "openstack" {
+  version     = "= 1.5"
+  region      = "${var.region_b}"
 
-    source ~/openrc.sh
-    terraform init
+  alias = "region_b"
+}
+```
 
-    Initializing the backend...
-    
-    Successfully configured the backend "swift"! Terraform will automatically
-    use this backend unless the backend configuration changes.
-    ...
+Now, every actions specific to the A isntance, we'll do the same for B instance.
 
-Alright. Now let's apply the script as usual:
+```terraform
+data "openstack_networking_network_v2" "public_b" {
+  name     = "Ext-Net"
+  provider = "openstack.region_b"
+}
 
-    source ~/openrc.sh
-    terraform apply -auto-approve
-    ...
+resource "openstack_networking_port_v2" "public_b" {
+  count          = "${var.count}"
+  name           = "${var.name}_b_${count.index}"
+  network_id     = "${data.openstack_networking_network_v2.public_b.id}"
+  admin_state_up = "true"
+  provider       = "openstack.region_b"
+}
 
-And look at the directory structure:
+resource "openstack_compute_keypair_v2" "keypair_b" {
+  name       = "${var.name}"
+  public_key = "${file(var.ssh_public_key)}"
+  provider   = "openstack.region_b"
+}
 
-    ls
+resource "openstack_compute_instance_v2" "nodes_b" {
+  count       = "${var.count}"
+  name        = "${var.name}_b_${count.index}"
+  image_name  = "Ubuntu 18.04"
+  flavor_name = "${var.flavor_name}"
+  key_pair    = "${openstack_compute_keypair_v2.keypair_b.name}"
+  user_data   = "${data.template_file.userdata.rendered}"
 
-    main.tf  Makefile  outputs.tf  README.org  variables.tf
+  network {
+    access_network = true
+    port           = "${openstack_networking_port_v2.public_b.*.id[count.index]}"
+  }
 
-No `tfstate` file! Where could it be? Well it should be present in a swift container
-as defined in the `tf` file. So lets check this:
+  provider = "openstack.region_b"
+}
 
-    openstack container list
-    openstack object list demo-remote-state
+resource "null_resource" "provision_a" {
+  count = "${var.count}"
 
-    +-------------------------------+
-    | Name                          |
-    +-------------------------------+
-    | demo-remote-state             |
-    +-------------------------------+
-    +------------+
-    | Name       |
-    +------------+
-    | tfstate.tf |
-    +------------+
+  triggers {
+    id = "${openstack_compute_instance_v2.nodes_a.*.id[count.index]}"
+  }
 
-Right where it should be. This means that anyone running the same script on another
-machine with credentials accessing the same project on the same openstack region
-should have access to this `tfstate` file.
+  connection {
+    host = "${openstack_compute_instance_v2.nodes_a.*.access_ip_v4[count.index]}"
+    user = "ubuntu"
+  }
 
-Notice: terraform maintains a local copy of this file in the `.terraform` directory.
+  provisioner "file" {
+    source      = "./www/public"
+    destination = "/home/ubuntu/${var.name}"
+  }
+}
 
-# Workspaces<a id="sec-5" name="sec-5"></a>
+resource "null_resource" "provision_b" {
+  count = "${var.count}"
 
-Terraform also allows you to manage your environments with the \`workspaces\` feature.
-You can easily switch from one environment to the other by a simple command.
+  triggers {
+    id = "${openstack_compute_instance_v2.nodes_b.*.id[count.index]}"
+  }
 
-# Going Further<a id="sec-6" name="sec-6"></a>
+  connection {
+    host = "${openstack_compute_instance_v2.nodes_b.*.access_ip_v4[count.index]}"
+    user = "ubuntu"
+  }
 
-We're finished with terraform basics on OVH. Now we'll go deeper into bootstrapping 
-real infrastructure, starting with a public cloud virtual machine.
+  provisioner "file" {
+    source      = "./www/public"
+    destination = "/home/ubuntu/${var.name}"
+  }
+}
+```
 
-See you on [the fourth step](../3-simple-public-instance/README.md) of our journey.
+As you can see, some part like the post-boot script can be shared between the A and B instance.
+
+Now we have 2 instances. We need to setup the Round Robin DNS.
+
+## Adding the OVH provider and confirgure the DNS zone
+
+Let's edit 'main.tf' to add the OVH provider we'll use for the DNS part.
+
+Now we want to declare the OVH provider.
+
+```terraform
+provider "ovh" {
+  #  version  = "~> 0.3"
+  endpoint = "ovh-eu"
+}
+```
+
+To set your OVH API credentials, please refere to the [documentation](https://www.terraform.io/docs/providers/ovh/index.html#configuration-reference).
+
+```terraform
+# setup subdomain
+data "ovh_domain_zone" "rootzone" {
+  name = "${var.zone}"
+}
+
+# trick to filter ipv6 addrs
+data "template_file" "ipv4_addr_a" {
+  count    = "${var.count}"
+  template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_a.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
+}
+
+data "template_file" "ipv4_addr_b" {
+  count    = "${var.count}"
+  template = "${element(compact(split(",", replace(join(",", flatten(openstack_networking_port_v2.public_b.*.all_fixed_ips)), "/[[:alnum:]]+:[^,]+/", ""))), count.index)}"
+}
+
+resource "ovh_domain_zone_record" "subdomain_records_a" {
+  count     = "${var.count}"
+  zone      = "${data.ovh_domain_zone.rootzone.name}"
+  subdomain = "${var.name}"
+  fieldtype = "A"
+  target    = "${data.template_file.ipv4_addr_a.*.rendered[count.index]}"
+}
+
+resource "ovh_domain_zone_record" "subdomain_records_b" {
+  count     = "${var.count}"
+  zone      = "${data.ovh_domain_zone.rootzone.name}"
+  subdomain = "${var.name}"
+  fieldtype = "A"
+  target    = "${data.template_file.ipv4_addr_b.*.rendered[count.index]}"
+}
+```
+
+Now we need few more variables in 'variables.tf'
+
+```terraform
+variable "region_b" {
+  description = "The id of the second openstack region"
+  default = "WAW1"
+}
+
+variable "zone" {
+  description = "the domain root zone"
+}
+
+variable "email" {
+  description = "email for letsencrypt registration"
+}
+```
+
+## Run Terraform
+
+Now it's time to run terraform. As we said, there are dependency and we can ask terraform to show us what is going to be done before doing it:
+
+```bash
+$ terraform plan -var zone=iac.ovh
+```
+
+Now we can apply as it's proposed. Think about adding your ssh key in your agent before runing it.
+
+```bash
+$ eval $(ssh-agent)
+$ ssh-add
+$ terraform apply -auto-approve -var zone=iac.ovh
+```
+
+# Going Further<a id="sec-5" name="sec-5"></a>
+
+We're finished with the terraform first instance on OVH. Now we'll add some complexity using multi providers and multi regions.
+
+See you on [the fourth step](../4-new-region-new-provider/README.md) of our journey.

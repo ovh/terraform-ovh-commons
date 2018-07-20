@@ -15,7 +15,7 @@ variable "name" {
 }
 
 variable "ssh_public_key" {
-  description = "The path of the ssh public key that will be used by ansible to provision the hosts"
+  description = "The path of the ssh public key that will be used"
   default     = "~/.ssh/id_rsa.pub"
 }
 
