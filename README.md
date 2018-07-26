@@ -6,7 +6,7 @@ This repo contains commons resources to interact with [OVH Public Cloud](https:/
 
 We provide a step-by-step guide on how to use [Terraform](https://www.terraform.io/) with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/).
 
-This is mainly for learning purpose but the use case presented can be use to deploy real infrastructures. Here, we'll deploy a web application on multiple nodes and multiple regions to be able to address important loads and provide redondency on two separated datacenters. We'll use the well known Wrodpress blog CMS to keep it simple.
+This is mainly for learning purpose but the use case presented can be use to deploy real infrastructures. Here, we'll deploy a web application on multiple nodes and multiple regions to be able to address important loads and provide redondency on two separated datacenters. We'll use the well known Wordpress blog CMS to keep it simple.
 
 
 # Journey
