@@ -10,7 +10,7 @@ This document is the fourth part of a [step by step guide](../0-simple-terraform
 the [Hashicorp Terraform](https://terraform.io) tool with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/). 
 Previously we created a Public Cloud instance to host a static blog based on [hugo](https://gohugo.io/getting-started/quick-start/) working with post-boot scripts.
 Now we'll go a bit futher adding TLS security and redondency accrose regions using Roud Robin DNS. We'll start our first high availability infrastructure. For that, we'll see:
-- how to generate a TLS certificat with terraform
+- how to generate a TLS certificate with terraform
 - how to manage two instances in two regions
 - how to live manage the DNS using the OVH provider in terraform in order to round robin DNS accros regions.
 
@@ -20,7 +20,7 @@ Every documented part here should be considered as an addition of the previous s
 
 Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-In addition of the previous pre-requisites, we need to indroduce the ACME Let's Encrypt provider to manage the TLS certificat. The ACME provider is not already merged in the upstream terraform code, so you have to install it as a side plugin.
+In addition of the previous pre-requisites, we need to indroduce the ACME Let's Encrypt provider to manage the TLS certificate. The ACME provider is not already merged in the upstream terraform code, so you have to install it as a side plugin.
 
 ## Installing the ACME teraform module
 
@@ -38,7 +38,13 @@ mv /tmp/terraform-provider-acme ~/.terraform.d/plugins
 
 ## Generating the TLS certificat
 
+To do that, we need a key to register on Let's Encrypt API and to sign our request.
+
 ```terraform
+provider "acme" {
+  server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
+}
+
 # letsencrypt acme challenge
 # Create the private key for the registration (not the certificate)
 resource "tls_private_key" "private_key" {
@@ -47,24 +53,21 @@ resource "tls_private_key" "private_key" {
 
 # Set up a registration using a private key from tls_private_key
 resource "acme_registration" "reg" {
-  server_url      = "https://acme-v01.api.letsencrypt.org/directory"
   account_key_pem = "${tls_private_key.private_key.private_key_pem}"
   email_address   = "${var.email}"
 }
 
 # Create a certificate
 resource "acme_certificate" "certificate" {
-  server_url      = "https://acme-v01.api.letsencrypt.org/directory"
-  account_key_pem = "${tls_private_key.private_key.private_key_pem}"
+  account_key_pem = "${acme_registration.reg.account_key_pem}"
   common_name     = "${var.name}.${var.zone}"
-
   dns_challenge {
     provider = "ovh"
   }
-
-  registration_url = "${acme_registration.reg.id}"
 }
 ```
+
+Let's Encrypt need to certify you are the owner of the domain. For that, they challenge you asking for some modifications on the space served by the webserver by adding a special file there. As the server does not exist yet, we'll use the second dhallenge methode which is DNS. Let's Encrypt will ask us to ass a TXT entry in the DNS zone to certify we own it.
 
 ## Adapting the 1rst instance to use the certificate
 
@@ -127,7 +130,7 @@ CLOUDCONFIG
 }
 ```
 
-The template for the virtual host in Apache need some change too in order to use the .pem files. Remember, it was managed by a local template file "myblog.conf.tpl"
+The template for the virtual host in Apache need some changes too in order to use the .pem files. Remember, it was managed by a local template file "myblog.conf.tpl"
 
 ```apache
 <IfModule mod_ssl.c>
@@ -173,7 +176,9 @@ provider "openstack" {
 }
 ```
 
-Now, every actions specific to the A isntance, we'll do the same for B instance.
+Now, for every actions specific to the A instance, we'll do the same for the B instance. 
+
+Remark: A and B instance can share the same template files. There is no need to create B template files.
 
 ```terraform
 data "openstack_networking_network_v2" "public_b" {
@@ -211,24 +216,6 @@ resource "openstack_compute_instance_v2" "nodes_b" {
   provider = "openstack.region_b"
 }
 
-resource "null_resource" "provision_a" {
-  count = "${var.count}"
-
-  triggers {
-    id = "${openstack_compute_instance_v2.nodes_a.*.id[count.index]}"
-  }
-
-  connection {
-    host = "${openstack_compute_instance_v2.nodes_a.*.access_ip_v4[count.index]}"
-    user = "ubuntu"
-  }
-
-  provisioner "file" {
-    source      = "./www/public"
-    destination = "/home/ubuntu/${var.name}"
-  }
-}
-
 resource "null_resource" "provision_b" {
   count = "${var.count}"
 
@@ -247,8 +234,6 @@ resource "null_resource" "provision_b" {
   }
 }
 ```
-
-As you can see, some part like the post-boot script can be shared between the A and B instance.
 
 Now we have 2 instances. We need to setup the Round Robin DNS.
 
@@ -320,13 +305,7 @@ variable "email" {
 
 ## Run Terraform
 
-Now it's time to run terraform. As we said, there are dependency and we can ask terraform to show us what is going to be done before doing it:
-
-```bash
-$ terraform plan -var zone=iac.ovh
-```
-
-Now we can apply as it's proposed. Think about adding your ssh key in your agent before runing it.
+Now we can apply those changes. Terraform will generate the certificate, delete the A instance because his configuration has changed and recreate it as well as the B instance. Then the DNS will be updated to manage the Round Robin DNS.
 
 ```bash
 $ eval $(ssh-agent)
@@ -336,6 +315,6 @@ $ terraform apply -auto-approve -var zone=iac.ovh
 
 # Going Further<a id="sec-5" name="sec-5"></a>
 
-We're finished with the terraform first instance on OVH. Now we'll add some complexity using multi providers and multi regions.
+We're finished with the terraform first high availability architecture on OVH. Round Robin DNS is not a production ready solution, we'll see how to improve it for a rock solid solution with a load balancing system.
 
-See you on [the fourth step](../4-new-region-new-provider/README.md) of our journey.
+See you on [the fifth step](../WIP/README.md) of our journey.
