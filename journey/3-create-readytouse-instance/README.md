@@ -1,6 +1,6 @@
 - [Objective](#sec-1)
-- [Pre requisites](#sec-2)
-- [In pratice](#sec-4)
+- [Pre-requisites](#sec-2)
+- [In practice](#sec-4)
 - [Going Further](#sec-5)
 
 
@@ -13,18 +13,13 @@ Here we'll create a Public Cloud instance to host a static blog based on [hugo](
 - see how to run post-install scripts on an instance
 - see how to send files to an instance at boot time
 
-# Pre requisites<a id="sec-2" name="sec-2"></a>
+# Pre-requisites<a id="sec-2" name="sec-2"></a>
 
-Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
+Please refer to the pre-requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-In addition of the previous pre-requisites, we need to indroduce hugo to generate the website.
+In addition of the previous pre-requisites, we need to introduce hugo to generate the static website. As this is not the main purpose of this tutorial, we'll pass quickely on that part.
 
-## Install Hugo: a popular static website generator
-
-As this is not the main purpose of this tutorial, we'll provide you a simple static blog content generated with hugo.
-
-First follow the getting started guide to install hugo on your system.
-Then generate a website with some content
+First follow the getting started guide to install hugo on your system. Then generate a website with some content:
 
     curl -Lo /tmp/example.zip https://github.com/Xzya/hugo-material-blog/archive/master.zip
     unzip /tmp/example.zip -d /tmp
@@ -36,13 +31,13 @@ You can edit/remove/add some content, then generate your site
 
     cd www && hugo
 
-Your webiste has been generated in the \`www/public\` directory
+Your website has been generated in the \`www/public\` directory
 
 NB: you can preview your site by serving files with hugo:
 
     hugo server -b 0.0.0.0 -p 8080 -s www
 
-# In pratice<a id="sec-4" name="sec-4"></a>
+# In practice<a id="sec-4" name="sec-4"></a>
 
 ## Preparing the basics for starting an instance
 
@@ -56,9 +51,9 @@ provider "openstack" {
 }
 ```
 
-As you can see, we specify the version of the provider to freez it in our code. The reason is terraform move a lot and each new version comes with a lot of changes. We don't want a change on the OpenStack provider will impact our deployment. That's a good pratice for long terme code management.
+As you can see, we specify the version of the provider to freeze it in our code. The reason is terraform move a lot and each new version comes with a lot of changes. We don't want a change on the OpenStack provider will impact our deployment. That's a good practice for long term code management.
 
-Now let's add a network port, a keypair and the instance. As you can imagine, we are touching the dependancy notions. To start an instance which require an ssh keypair and a network port, terraform will first create the keypair and the port. Once it's available, terraform will create the instance. Those dependencies are implicit, terraform will create a dependancy tree before starting anything.
+Now let's add a network port, a keypair and the instance. As you can imagine, we are touching the dependency notions. To start an instance which require an ssh keypair and a network port, terraform will first create the keypair and the port. Once it's available, terraform will create the instance. Those dependencies are implicit, terraform will create a dependency tree before starting anything.
 
 ```terraform
 data "openstack_networking_network_v2" "public_a" {
@@ -99,9 +94,9 @@ resource "openstack_compute_instance_v2" "nodes_a" {
 
 If you are attentive, you can identify two strange properties: count and network_id. 
 
-"count" seems to come from variables but it's used in some properties with "count.index". This is a special property (called [interpolation syntax](https://www.terraform.io/docs/configuration/interpolation.html)) managed by terraform to perform special actions. Here it's to iterate on multiple resources. "count = 4" ask terraform to create 4 instances with the same properties. To differentiate those instances, we'll add this nomber in the name using the count.index interpolation syntax.
+"count" seems to come from variables but it's used in some properties with "count.index". This is a special property (called [interpolation syntax](https://www.terraform.io/docs/configuration/interpolation.html)) managed by terraform to perform special actions. Here it's to iterate on multiple resources. "count = 4" ask terraform to create 4 instances with the same properties. To differentiate those instances, we'll add this number in the name using the count.index interpolation syntax.
 
-network_id is not defined anywhere but it comes from a data source. A data source is a source of data... A data soruce is a static data with a method to access it. Here we are speaking about the ID of the public network, we can get it simply by asking the OpenStack API.
+network_id is not defined anywhere but it comes from a data source. A data source is a source of data... A data source is a static data with a method to access it. Here we are speaking about the ID of the public network, we can get it simply by asking the OpenStack API.
 
 ```terraform
 data "openstack_networking_network_v2" "public_a" {
@@ -145,7 +140,7 @@ variable "zone" {
 }
 ```
 
-Now we have the basics to start an instances. We'll see how to set up the instance with specific parameters at boot time.
+Now we have the basics to start an instance. We'll see how to set up the instance with specific parameters at boot time.
 
 ## Configuring this instance
 
@@ -153,7 +148,7 @@ Back in 'main.tf', in the instance definition, there is a user_data property we 
 
 A user_data is a the "personality" of an instance, it's usually a [cloud-config](https://cloudinit.readthedocs.io/en/latest/index.html) syntax interpreted by cloud-init, a set of script ran at boot time on a cloud image. It can include system parameters, users configurations, simple file definitions, boot scripts to run...
 
-A template_file can render a file based on a template! Awesome! It's done using '${data.template_file.userdata.rendered}'. We juste need to define 'data.template_file.userdata'
+A template_file can render a file based on a template! Awesome! It's done using '${data.template_file.userdata.rendered}'. We just need to define 'data.template_file.userdata'
 
 ```terraform
 data "template_file" "userdata" {
@@ -193,7 +188,7 @@ data "template_file" "myblog_conf" {
 
 ```
 
-This template include some files to add in the system (write_files) and a script to run at the end of the boot process (runcmd). The files to add are also template based.
+This template includes some files to add in the system (write_files) and a script to run at the end of the boot process (runcmd). The files to add are also template based.
 
 ```terraform
 data "http" "myip" {
@@ -288,7 +283,7 @@ resource "null_resource" "provision_a" {
 }
 ```
 
-Simple, right? When terraform will find a the resource 'openstack_compute_instance_v2.nodes_a.*.id[count.index]' ready, it will scp the 'www/public' folder in '/home/ubuntu/${var.name}' using the ubuntu user.
+Simple, right? When terraform will find the resource 'openstack_compute_instance_v2.nodes_a.*.id[count.index]' ready, it will scp the 'www/public' folder in '/home/ubuntu/${var.name}' using the ubuntu user.
 
 ## Run Terraform
 
@@ -376,7 +371,7 @@ can't guarantee that exactly these actions will be performed if
 "terraform apply" is subsequently run.
 ```
 
-Now we can apply as it's proposed. Think about adding your ssh key in your agent before runing it.
+Now we can apply as it's proposed. Think about adding your ssh key in your agent before running it.
 
 ```bash
 $ eval $(ssh-agent)
