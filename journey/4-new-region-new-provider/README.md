@@ -1,6 +1,6 @@
 - [Objective](#sec-1)
-- [Pre requisites](#sec-2)
-- [In pratice](#sec-4)
+- [Pre-requisites](#sec-2)
+- [In practice](#sec-4)
 - [Going Further](#sec-5)
 
 
@@ -9,20 +9,20 @@
 This document is the fourth part of a [step by step guide](../0-simple-terraform/README.md) on how to use 
 the [Hashicorp Terraform](https://terraform.io) tool with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/). 
 Previously we created a Public Cloud instance to host a static blog based on [hugo](https://gohugo.io/getting-started/quick-start/) working with post-boot scripts.
-Now we'll go a bit futher adding TLS security and redondency accrose regions using Roud Robin DNS. We'll start our first high availability infrastructure. For that, we'll see:
+Now we'll go a bit further adding TLS security and redundency across regions using Roud Robin DNS. We'll start our first high availability infrastructure. For that, we'll see:
 - how to generate a TLS certificate with terraform
 - how to manage two instances in two regions
-- how to live manage the DNS using the OVH provider in terraform in order to round robin DNS accros regions.
+- how to live manage the DNS using the OVH provider in terraform in order to round robin DNS across regions.
 
 Every documented part here should be considered as an addition of the previous steps.
 
-# Pre requisites<a id="sec-2" name="sec-2"></a>
+# Pre-requisites<a id="sec-2" name="sec-2"></a>
 
-Please refer to the pre requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
+Please refer to the pre-requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-In addition of the previous pre-requisites, we need to indroduce the ACME Let's Encrypt provider to manage the TLS certificate. The ACME provider is not already merged in the upstream terraform code, so you have to install it as a side plugin.
+In addition of the previous pre-requisites, we need to introduce the ACME Let's Encrypt provider to manage the TLS certificate. The ACME provider is not already merged in the upstream terraform code, so you have to install it as a side plugin.
 
-## Installing the ACME teraform module
+## Installing the ACME terraform module
 
 Installing a plugin for terraform is really simple:
 
@@ -34,9 +34,9 @@ unzip  /tmp/terraform-provider-acme.zip -d /tmp
 mv /tmp/terraform-provider-acme ~/.terraform.d/plugins
 ```
 
-# In pratice<a id="sec-4" name="sec-4"></a>
+# In practice<a id="sec-4" name="sec-4"></a>
 
-## Generating the TLS certificat
+## Generating the TLS certificate
 
 To do that, we need a key to register on Let's Encrypt API and to sign our request.
 
@@ -67,11 +67,11 @@ resource "acme_certificate" "certificate" {
 }
 ```
 
-Let's Encrypt need to certify you are the owner of the domain. For that, they challenge you asking for some modifications on the space served by the webserver by adding a special file there. As the server does not exist yet, we'll use the second dhallenge methode which is DNS. Let's Encrypt will ask us to ass a TXT entry in the DNS zone to certify we own it.
+Let's Encrypt need to certify you are the owner of the domain. For that, they challenge you asking for some modifications on the space served by the webserver by adding a special file there. As the server does not exist yet, we'll use the second challenge method which is DNS. Let's Encrypt will ask us to ass a TXT entry in the DNS zone to certify we own it.
 
 ## Adapting the 1rst instance to use the certificate
 
-Of course we have to adapt a little bit the post install scripts to install and use the TLS certificate. Here are the changes required in the 1rst instance to configure the certificate.
+Of course, we have to adapt a little bit the post install scripts to install and use the TLS certificate. Here are the changes required in the 1rst instance to configure the certificate.
 
 Firstly, the user-data should be modified:
 
@@ -130,7 +130,7 @@ CLOUDCONFIG
 }
 ```
 
-The template for the virtual host in Apache need some changes too in order to use the .pem files. Remember, it was managed by a local template file "myblog.conf.tpl"
+The template for the virtual host in Apache needs some changes too in order to use the .pem files. Remember, it was managed by a local template file "myblog.conf.tpl"
 
 ```apache
 <IfModule mod_ssl.c>
@@ -165,7 +165,7 @@ Now we have a single instance working with a TLS certificate. Let's do the same 
 
 ## Adding the B region with the B instance
 
-We'll start by adding a new OpenStack provider targgeting a new region in 'main.tf'
+We'll start by adding a new OpenStack provider targeting a new region in 'main.tf'
 
 ```terraform
 provider "openstack" {
@@ -176,7 +176,7 @@ provider "openstack" {
 }
 ```
 
-Now, for every actions specific to the A instance, we'll do the same for the B instance. 
+Now, for every action specific to the A instance, we'll do the same for the B instance. 
 
 Remark: A and B instance can share the same template files. There is no need to create B template files.
 
@@ -237,7 +237,7 @@ resource "null_resource" "provision_b" {
 
 Now we have 2 instances. We need to setup the Round Robin DNS.
 
-## Adding the OVH provider and confirgure the DNS zone
+## Adding the OVH provider and configure the DNS zone
 
 Let's edit 'main.tf' to add the OVH provider we'll use for the DNS part.
 
@@ -250,7 +250,7 @@ provider "ovh" {
 }
 ```
 
-To set your OVH API credentials, please refere to the [documentation](https://www.terraform.io/docs/providers/ovh/index.html#configuration-reference).
+To set your OVH API credentials, please refer to the [documentation](https://www.terraform.io/docs/providers/ovh/index.html#configuration-reference).
 
 ```terraform
 # setup subdomain
@@ -315,6 +315,6 @@ $ terraform apply -auto-approve -var zone=iac.ovh
 
 # Going Further<a id="sec-5" name="sec-5"></a>
 
-We're finished with the terraform first high availability architecture on OVH. Round Robin DNS is not a production ready solution, we'll see how to improve it for a rock solid solution with a load balancing system.
+We're finished with the terraform first high availability architecture on OVH. Round Robin DNS is not a production ready solution, we'll see how to improve it for a rock-solid solution with a load balancing system.
 
 See you on [the fifth step](../WIP/README.md) of our journey.
