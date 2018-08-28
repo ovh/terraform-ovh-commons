@@ -228,6 +228,6 @@ terraform destroy -var region=SBG3
 
 # Going Further<a id="sec-4"></a>
 
-You can now jump to the [thierd step](../2-simple-terraform-state/README.md) of our journey introducing terraform state.
+You can now jump to the [third step](../2-simple-terraform-state/README.md) of our journey introducing terraform state.
 
 Of course, if you want to deep dive into terraform, you can also read the official [guides](https://www.terraform.io/guides/index.html) & [docs](https://www.terraform.io/docs/index.html).
