@@ -269,7 +269,7 @@ CLOUDCONFIG
 
 resource "openstack_compute_instance_v2" "nodes_a" {
   count       = "${var.count}"
-  name        = "${var.name}_a1_${count.index}"
+  name        = "${var.name}_a_${count.index}"
   image_name  = "Ubuntu 18.04"
   flavor_name = "${var.flavor_name}"
   key_pair    = "${openstack_compute_keypair_v2.keypair_a.name}"
@@ -285,7 +285,7 @@ resource "openstack_compute_instance_v2" "nodes_a" {
 
 resource "openstack_compute_instance_v2" "nodes_b" {
   count       = "${var.count}"
-  name        = "${var.name}_b1_${count.index}"
+  name        = "${var.name}_b_${count.index}"
   image_name  = "Ubuntu 18.04"
   flavor_name = "${var.flavor_name}"
   key_pair    = "${openstack_compute_keypair_v2.keypair_b.name}"
