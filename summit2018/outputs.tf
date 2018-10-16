@@ -11,7 +11,7 @@ You can also check your metrics at:
 
 and generate simple http load with:
 
-ab -c 10 -n 1000 https://keynote2018.1337c10ud.ovh/index.html
+ab -c 10 -n 1000 https://${var.name}.${var.zone}/index.html
 
   Enjoy !!!
 EOF
