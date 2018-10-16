@@ -9,7 +9,9 @@
 
 Please refer to the pre-requisites paragraph of the [first part](../0-simple-terraform/README.md) of this guide.
 
-In addition of the previous pre-requisites, we need to introduce the ACME Let's Encrypt provider to manage the TLS certificate. The ACME provider is not already merged in the upstream terraform code, so you have to install it as a side plugin.
+In addition of the previous pre-requisites, we need to mention that this tech lab uses the last terraform OVH provider features
+that may not have been released officialy by Hashicorp at the time of this demo. You can build the OVH provider and make
+the proper terraform setup in order to use it if you don't want to wait for the official release.
 
 ## Register your OVH products
 
