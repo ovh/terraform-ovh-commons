@@ -1,20 +1,9 @@
-- [Objective](#sec-1)
+# OVH Summit 2018 terraform tech lab
+
 - [Pre-requisites](#sec-2)
 - [In practice](#sec-4)
 - [Going Further](#sec-5)
 
-
-# Objective<a id="sec-1" name="sec-1"></a>
-
-This document is the fourth part of a [step by step guide](../0-simple-terraform/README.md) on how to use 
-the [Hashicorp Terraform](https://terraform.io) tool with [OVH Public Cloud](https://www.ovh.com/world/public-cloud/instances/). 
-Previously we created a Public Cloud instance to host a static blog based on [hugo](https://gohugo.io/getting-started/quick-start/) working with post-boot scripts.
-Now we'll go a bit further adding TLS security and redundency across regions using Roud Robin DNS. We'll start our first high availability infrastructure. For that, we'll see:
-- how to generate a TLS certificate with terraform
-- how to manage two instances in two regions
-- how to live manage the DNS using the OVH provider in terraform in order to round robin DNS across regions.
-
-Every documented part here should be considered as an addition of the previous steps.
 
 # Pre-requisites<a id="sec-2" name="sec-2"></a>
 
@@ -61,8 +50,8 @@ Download your `openrc.sh` file from the OVH Manager & run it.
 
 
 ```bash
-$ eval $(ssh-agent)
-$ ssh-add
+$ eval $(ssh-agent) && ssh-add
+$ git clone https://github.com/ovh/terraform-ovh-commons && cd terraform-ovh-commons/
 $ terraform init
 $ terraform apply 
 ```
