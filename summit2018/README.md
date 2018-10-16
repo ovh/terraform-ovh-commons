@@ -63,5 +63,6 @@ Download your `openrc.sh` file from the OVH Manager & run it.
 ```bash
 $ eval $(ssh-agent)
 $ ssh-add
+$ terraform init
 $ terraform apply 
 ```
