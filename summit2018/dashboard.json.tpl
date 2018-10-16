@@ -55,7 +55,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "os.cpu{host=~\"${name}.*}\"}",
+              "expr": "os.cpu{host=~\"${name}.*\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{__name__}} {{host}}",
@@ -130,7 +130,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "os.mem{host=~\"${name}.*}\"}",
+              "expr": "os.mem{host=~\"${name}.*\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{__name__}} {{host}}",
@@ -241,7 +241,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(os.cpu{host=~\"${name}.*}\"})",
+              "expr": "count(os.cpu{host=~\"${name}.*\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A"
@@ -317,7 +317,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "os.load5{host=\"${name}-a-0}\"}",
+              "expr": "os.load5{host=\"${name}-a-0\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -393,7 +393,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "os.load5{host=\"${name}-b-0}\"}",
+              "expr": "os.load5{host=\"${name}-b-0\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,

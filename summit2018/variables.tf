@@ -18,7 +18,7 @@ variable "region_b" {
 
 variable "name" {
   description = "name of project. Used to forge subdomain"
-  default = "summit2018"
+  default = "techsummit2018"
 }
 
 variable "ssh_public_key" {
