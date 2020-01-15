@@ -1,0 +1,8 @@
+# Openstack target region for cloud instances (ex: GRA5, BHS3, ...)
+region="..."
+
+# iploadbalancing service name
+iplb_id="loadbalancer-..."
+
+# path to your ssh public key
+ssh_pubkey_path="~/.ssh/id_rsa.pub"
