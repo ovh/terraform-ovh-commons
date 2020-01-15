@@ -1,0 +1,8 @@
+# Openstack target region for cloud instances (ex: GRA5, BHS3, ...)
+region="..."
+
+# vrack service name
+vrack_id="..."
+
+# iploadbalancing service name
+iplb_id="loadbalancer-..."
