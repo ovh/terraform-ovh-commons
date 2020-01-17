@@ -1,0 +1,8 @@
+# Openstack target region for cloud instances (ex: GRA5, BHS3, ...)
+region="..."
+
+# vrack service name
+vrack_id="..."
+
+# dedicateds servers service names
+dedicated_servers_ids = "..."
