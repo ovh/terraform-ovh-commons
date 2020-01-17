@@ -39,3 +39,7 @@ id_rsa*
 #editors
 *~
 .\#*
+
+# Kubespray 
+examples/k8s-sd-openstack/infra/kubespray
+examples/k8s-sd-openstack/infra/mycluster
