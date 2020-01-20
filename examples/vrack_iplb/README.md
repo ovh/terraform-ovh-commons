@@ -3,6 +3,9 @@
 This example setups an IP Loabalancing service with cloud instances backends
 in a vrack.
 
+> Applying this plan as-is will result in you being billed for 3 [s1-4](https://www.ovhcloud.com/fr/public-cloud/sandbox/)
+> instances in supplement to your existing infrastructure and load balancers.
+
 # Requirements
 
 This example requires terraform > 0.12.
