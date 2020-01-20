@@ -5,6 +5,9 @@ Machines in the same network, through the Vrack service.
 
 In the end we use ansible kubespray roles to provision a Kubernetes cluster on the nodes.
 
+> Applying this plan as-is will result in you being billed for 4 [b2-7](https://www.ovhcloud.com/fr/public-cloud/guaranteed-resources/)
+> instances in supplement to your existing infrastructure and dedicated server.
+
 # Requirements
 
 This example requires:
