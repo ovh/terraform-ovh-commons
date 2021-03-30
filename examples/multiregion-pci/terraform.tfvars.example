@@ -1,0 +1,5 @@
+name           = "myinfra"
+ssh_public_key = "ssh-rsa ..."
+region_one     = "GRA5"
+region_two     = "SBG5"
+region_three   = "DE1"
