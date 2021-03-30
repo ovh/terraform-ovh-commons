@@ -23,9 +23,9 @@ module "hosts-one" {
   image_name     = "Debian 10"
   name           = "${var.name}-one"
   nb_hosts       = 1
-  network_cidr   = "172.16.0.0/16"
+  network_cidr   = var.network_cidr
   ssh_public_key = var.ssh_public_key
-  subnet_cidr    = cidrsubnet("172.16.0.0/16", 4, 0)
+  subnet_cidr    = cidrsubnet(var.network_cidr, 4, 0)
   vlan_id        = 100
 
   providers = {
@@ -40,9 +40,9 @@ module "hosts-two" {
   image_name     = "Debian 10"
   name           = "${var.name}-two"
   nb_hosts       = 1
-  network_cidr   = "172.16.0.0/16"
+  network_cidr   = var.network_cidr
   ssh_public_key = var.ssh_public_key
-  subnet_cidr    = cidrsubnet("172.16.0.0/16", 4, 1)
+  subnet_cidr    = cidrsubnet(var.network_cidr, 4, 1)
   vlan_id        = 100
 
   providers = {
@@ -57,9 +57,9 @@ module "hosts-three" {
   image_name     = "Debian 10"
   name           = "${var.name}-three"
   nb_hosts       = 1
-  network_cidr   = "172.16.0.0/16"
+  network_cidr   = var.network_cidr
   ssh_public_key = var.ssh_public_key
-  subnet_cidr    = cidrsubnet("172.16.0.0/16", 4, 2)
+  subnet_cidr    = cidrsubnet(var.network_cidr, 4, 2)
   vlan_id        = 100
 
   providers = {

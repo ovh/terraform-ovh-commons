@@ -17,3 +17,7 @@ variable "region_two" {
 variable "region_three" {
   type = string
 }
+
+variable "network_cidr" {
+  type = string
+}
