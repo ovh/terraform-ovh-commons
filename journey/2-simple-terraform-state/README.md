@@ -144,4 +144,4 @@ Notice: terraform maintains a local copy of this file in the `.terraform` direct
 
 We're finished with terraform basics on OVH. Now we'll go deeper into bootstrapping real infrastructure, starting with a public cloud virtual machine.
 
-See you on [the fourth step](../3-simple-public-instance/README.md) of our journey.
+See you on [the fourth step](../3-create-readytouse-instance/README.md) of our journey.
